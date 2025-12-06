@@ -3,25 +3,53 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
-import axios from 'axios';
 import { useVkRegister } from '@/hooks/useVkRegister';
-
-export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
+import { openVkAuthPopup } from '@/utils/vkAuth';
+import { getBaseUrl } from '@/utils/getBaseUrl';
 
 export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
-
-  const appId = '53108749'; // Замените на ваш client_id
-  const redirectUri = 'https://teamup-579l.vercel.app/auth/register'; 
+  const [isLoading, setIsLoading] = useState<'vk' | 'max' | null>(null);
 
   const { mutate: vkAuth } = useVkRegister();
+
+  const appId = '53108749';
+  const redirectUri = `${getBaseUrl()}/auth/vk-callback`;
 
   useEffect(() => {
     setMounted(true);
   }, []);
-  const [isLoading, setIsLoading] = useState<'vk' | 'max' | null>(null);
 
+  const handleVkRegister = async () => {
+    setIsLoading('vk');
+    try {
+      // Открываем popup для авторизации VK
+      const result = await openVkAuthPopup({
+        appId,
+        redirectUri,
+        scope: 'email,offline',
+      });
+
+      // Получаем vkId из результата (все еще в контексте основного окна!)
+      // Теперь отправляем на сервер для получения токена
+      vkAuth(result.vkId, {
+        onSuccess: () => {
+          setIsLoading(null);
+        },
+        onError: () => {
+          setIsLoading(null);
+        },
+      });
+    } catch (error: any) {
+      console.error('Ошибка авторизации VK:', error);
+      setIsLoading(null);
+      
+      // Можно показать уведомление пользователю
+      if (error?.error) {
+        alert(`Ошибка авторизации: ${error.errorDescription || error.error}`);
+      }
+    }
+  };
 
   const handleMaxRegister = async () => {
     setIsLoading('max');
@@ -31,32 +59,6 @@ export default function RegisterPage() {
       setIsLoading(null);
     }
   };
-
-    useEffect(() => {
-        // Получение параметров из URL hash (после редиректа)
-        // Проверяем, что мы на клиенте и компонент смонтирован
-        if (typeof window === 'undefined' || !mounted) return;
-        
-        const hash = window.location.hash.substring(1); // Убираем '#'
-        const params = new URLSearchParams(hash);
-    
-        console.log(params.get('email'))
-    
-        const userId = params.get('user_id');
-    
-        if (userId) {
-        // Отправляем userId на бэкенд для получения токена
-        vkAuth(userId);
-    
-        // Очищаем hash из URL (чтобы не было видно в истории браузера)
-        window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    }, [mounted, vkAuth]);
-    
-    const handleVKRegister = () => {
-        const scope = 'email,offline'; // Укажите необходимые разрешения
-        window.location.href = `https://oauth.vk.com/authorize?client_id=${appId}&display=popup&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`;
-    };
 
 
   return (
@@ -81,7 +83,7 @@ export default function RegisterPage() {
             <SocialButton
               provider="vk"
               label="Зарегистрироваться через VK"
-              onClick={handleVKRegister}
+              onClick={handleVkRegister}
               isLoading={isLoading === 'vk'}
               disabled={isLoading !== null}
             />

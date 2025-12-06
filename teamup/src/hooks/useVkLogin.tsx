@@ -22,17 +22,18 @@ export const useVkAuth = () => {
         return;
       }
 
-      console.log('TTOOOKKEN >>> ', token)
-
+      // ✅ ВАЖНО: localStorage.setItem выполняется в контексте основного окна,
+      // а не popup окна, так как мы используем postMessage
       localStorage.setItem("token", token);
       setAuth(token, user);
-
-      // ✅ ВСЕГДА идём на главную
 
       // ✅ если новый пользователь — откроем модалку после загрузки страницы
       if (isNew) {
         localStorage.setItem("showProfileModal", "true");
       }
+
+      // ✅ ВСЕГДА идём на главную после успешной авторизации
+      router.push('/');
     },
   });
 };
