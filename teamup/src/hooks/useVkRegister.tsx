@@ -14,10 +14,9 @@ export const useVkRegister = () => {
       
       localStorage.setItem("token", token);
       setAuth(token, user);
-      
-      // Используем window.location.href вместо роутера для избежания проблем с SSR
+
       if (typeof window !== 'undefined') {
-        window.location.href = '/auth/complete-profile';
+        window.location.href = '/';
       }
     },
   });
