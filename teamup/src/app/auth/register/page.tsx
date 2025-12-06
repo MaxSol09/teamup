@@ -18,7 +18,9 @@ export default function RegisterPage() {
         vkId: 4782774
     });
 
-    console.log(data)
+    console.log('запрос выполнен', data)
+
+    
 
     return data
   };

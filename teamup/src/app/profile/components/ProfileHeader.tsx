@@ -31,7 +31,7 @@ export const ProfileHeader = () => {
                         {user.avatar ? (
                         <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
                         ) : (
-                        user.name.charAt(0).toUpperCase()
+                        (user.name || '?').charAt(0).toUpperCase()
                         )}
                     </div>
                     <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center cursor-pointer">
