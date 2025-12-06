@@ -4,51 +4,42 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
 import { useVkAuth } from '@/hooks/useVkLogin';
-import { openVkAuthPopup } from '@/utils/vkAuth';
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState<'vk' | 'max' | null>(null);
 
   const { mutate: vkAuth } = useVkAuth();
-
-  const appId = '53108749';
-  const redirectUri = `https://teamup-579l.vercel.app/auth/login`;
+  
+    const appId = '53108749'; // Замените на ваш client_id
+    const redirectUri = 'https://teamup-579l.vercel.app/auth/login'; // Замените на URL вашего приложения
+  
 
   useEffect(() => {
     setMounted(true);
   }, []);
+  const [isLoading, setIsLoading] = useState<'vk' | 'max' | null>(null);
 
-  const handleVkLogin = async () => {
-    setIsLoading('vk');
-    try {
-      // Открываем popup для авторизации VK
-      const result = await openVkAuthPopup({
-        appId,
-        redirectUri,
-        scope: 'email,offline',
-      });
+    const handleLogin = () => {
+        const scope = 'email,offline'; // Укажите необходимые разрешения
+        window.location.href = `https://oauth.vk.com/authorize?client_id=${appId}&display=popup&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`;
+    };
 
-      // Получаем vkId из результата (все еще в контексте основного окна!)
-      // Теперь отправляем на сервер для получения токена
-      vkAuth(result.vkId, {
-        onSuccess: () => {
-          setIsLoading(null);
-        },
-        onError: () => {
-          setIsLoading(null);
-        },
-      });
-    } catch (error: any) {
-      console.error('Ошибка авторизации VK:', error);
-      setIsLoading(null);
-      
-      // Можно показать уведомление пользователю
-      if (error?.error) {
-        alert(`Ошибка авторизации: ${error.errorDescription || error.error}`);
+    useEffect(() => {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+
+      const vkId = params.get('user_id'); 
+
+      if (vkId) {
+        console.log("VK ID:", vkId);
+
+        // ✅ ОТПРАВЛЯЕМ НА НАШ СЕРВАК
+        vkAuth(vkId);
+
+        // ✅ ЧИСТИМ URL
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
-    }
-  };
+    }, []);
 
   const handleMaxLogin = async () => {
     setIsLoading('max');
@@ -83,7 +74,7 @@ export default function LoginPage() {
             <SocialButton
               provider="vk"
               label="Войти через VK"
-              onClick={handleVkLogin}
+              onClick={handleLogin}
               isLoading={isLoading === 'vk'}
               disabled={isLoading !== null}
             />
