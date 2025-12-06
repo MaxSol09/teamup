@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
 import axios from 'axios';
 
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
 
