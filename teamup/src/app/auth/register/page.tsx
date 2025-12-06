@@ -32,10 +32,11 @@ export default function RegisterPage() {
     }
   };
 
-  console.log('register')
-
     useEffect(() => {
         // Получение параметров из URL hash (после редиректа)
+        // Проверяем, что мы на клиенте и компонент смонтирован
+        if (typeof window === 'undefined' || !mounted) return;
+        
         const hash = window.location.hash.substring(1); // Убираем '#'
         const params = new URLSearchParams(hash);
     
@@ -44,16 +45,13 @@ export default function RegisterPage() {
         const userId = params.get('user_id');
     
         if (userId) {
-        // Сохраняем токен (например, в localStorage)
-        localStorage.setItem('vk_userId', userId);
-    
-        // Получаем данные пользователя
+        // Отправляем userId на бэкенд для получения токена
         vkAuth(userId);
     
         // Очищаем hash из URL (чтобы не было видно в истории браузера)
         window.history.replaceState({}, document.title, window.location.pathname);
         }
-    }, []);
+    }, [mounted, vkAuth]);
     
     const handleVKRegister = () => {
         const scope = 'email,offline'; // Укажите необходимые разрешения
