@@ -8,7 +8,7 @@ import { UserStatus } from '@/types/user';
 const STATUS_OPTIONS: UserStatus[] = [
   'Открыт к предложениям',
   'Ищу команду',
-  'Работаю над проектом',
+  'Ищу проект',
 ];
 
 export default function CompleteProfileModal() {

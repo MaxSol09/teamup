@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 
 export const useVkRegister = () => {
   const setAuth = useAuthStore((s) => s.setAuth);
+  const openProfileModal = useAuthStore((s) => s.openProfileModal);
 
   return useMutation({
     mutationFn: (vkId: string) => authService.registerWithVk(vkId),
@@ -22,6 +23,11 @@ export const useVkRegister = () => {
       
       localStorage.setItem("token", token);
       setAuth(token, user);
+
+      // ✅ Если профиль не заполнен (всегда при регистрации), показываем модалку
+      if (user && !user.isProfileCompleted) {
+        openProfileModal();
+      }
 
       if (typeof window !== 'undefined') {
         window.location.href = '/';

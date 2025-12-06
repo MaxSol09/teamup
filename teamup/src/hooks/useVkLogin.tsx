@@ -15,7 +15,7 @@ export const useVkAuth = () => {
       // axios возвращает { data: { token, user, ... }, status, headers, ... }
       // React Query передает весь ответ axios в onSuccess
       const data = response.data;
-      const { token, user, isNew } = data;
+      const { token, user } = data;
 
       if (!token) {
         console.error('Token is missing in response:', response);
@@ -25,13 +25,13 @@ export const useVkAuth = () => {
       localStorage.setItem("token", token);
       setAuth(token, user);
 
-      // ✅ ВСЕГДА идём на главную
-      router.push('/')
-
-      // ✅ если новый пользователь — откроем модалку после загрузки страницы
-      if (isNew) {
-        localStorage.setItem("showProfileModal", "true");
+      // ✅ Если профиль не заполнен, показываем модалку
+      if (user && !user.isProfileCompleted) {
+        openProfileModal();
       }
+
+      // ✅ ВСЕГДА идём на главную
+      router.push('/');
     },
   });
 };
