@@ -13,10 +13,8 @@ export const useVkRegister = () => {
     mutationFn: (vkId: string) => authService.registerWithVk(vkId),
 
     onSuccess: ({ data }) => {
-        console.log(data)
-
       setAuth(data.token, data.user);
-      // router.push('/');
+      router.push('/');
     },
   });
 };

@@ -5,8 +5,6 @@ import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
 import { useVkAuth } from '@/hooks/useVkLogin';
 
-export const dynamic = 'force-dynamic';
-
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
 
