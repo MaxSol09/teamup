@@ -1,24 +1,34 @@
-import { create } from 'zustand';
 
-interface AuthStore {
+
+import { create } from "zustand";
+
+interface AuthState {
   token: string | null;
-  user: any;
+  user: any | null;
+  showProfileModal: boolean;
 
   setAuth: (token: string, user: any) => void;
+  openProfileModal: () => void;
+  closeProfileModal: () => void;
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   user: null,
+  showProfileModal: false,
 
-  setAuth: (token, user) => {
-    localStorage.setItem('token', token);
-    set({ token, user });
-  },
+  setAuth: (token, user) => set({ token, user }),
+
+  openProfileModal: () => set({ showProfileModal: true }),
+  closeProfileModal: () => set({ showProfileModal: false }),
 
   logout: () => {
-    localStorage.removeItem('token');
-    set({ token: null, user: null });
+    localStorage.removeItem("token");
+    set({
+      token: null,
+      user: null,
+      showProfileModal: false,
+    });
   },
 }));

@@ -3,9 +3,12 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
+import { useVkAuth } from '@/hooks/useVkLogin';
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
+
+  const { mutate: vkAuth } = useVkAuth();
   
     const appId = '53108749'; // Замените на ваш client_id
     const redirectUri = 'https://teamup-579l.vercel.app/auth/login'; // Замените на URL вашего приложения
@@ -20,24 +23,21 @@ export default function LoginPage() {
         const scope = 'email,offline'; // Укажите необходимые разрешения
         window.location.href = `https://oauth.vk.com/authorize?client_id=${appId}&display=popup&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`;
     };
+
     useEffect(() => {
-      // Получение параметров из URL hash (после редиректа)
-      const hash = window.location.hash.substring(1); // Убираем '#'
+      const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
 
-      
-  
-      console.log(params.get('email'))
-  
-      const accessToken = params.get('access_token');
-      const userId = params.get('user_id');
-  
-      if (accessToken && userId) {
-  
-        // Получаем данные пользователя
-        console.log(userId);
-  
-        // Очищаем hash из URL (чтобы не было видно в истории браузера)
+      const accessToken = params.get('access_token'); // можешь не использовать
+      const vkId = params.get('user_id'); 
+
+      if (vkId) {
+        console.log("VK ID:", vkId);
+
+        // ✅ ОТПРАВЛЯЕМ НА НАШ СЕРВАК
+        vkAuth(vkId);
+
+        // ✅ ЧИСТИМ URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }, []);

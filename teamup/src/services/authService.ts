@@ -1,16 +1,17 @@
+import { API_ENDPOINTS } from '@/api/endpoints';
 import axios from 'axios';
 
 class AuthService {
   loginWithVk(vkId: string) {
-    return axios.post('/api/auth/vk/login', { vkId });
+    return axios.post(API_ENDPOINTS.AUTH.LOGIN, { vkId });
   }
 
   registerWithVk(vkId: string) {
-    return axios.post('/api/auth/vk/register', { vkId });
+    return axios.post(API_ENDPOINTS.AUTH.REGISTER, { vkId });
   }
 
   getMe(token: string) {
-    return axios.get('/api/auth/me', {
+    return axios.get(API_ENDPOINTS.AUTH.GET_ME, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

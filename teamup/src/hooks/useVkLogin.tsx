@@ -1,21 +1,22 @@
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
-import { useRouter } from 'next/navigation';
 
-export const useVkLogin = () => {
-  const router = useRouter();
+export const useVkAuth = () => {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
     mutationFn: (vkId: string) => authService.loginWithVk(vkId),
-
     onSuccess: ({ data }) => {
-      if (!data.isRegistered) {
-        router.push('/auth/complete-profile');
+      const { token, user, isNew } = data;
+
+      localStorage.setItem("token", token);
+      setAuth(token, user);
+
+      if (isNew) {
+        console.log('необходимо заполнить доп информацию')
       } else {
-        setAuth(data.token, data.user);
-        router.push('/');
+        console.log('красава')
       }
     },
   });

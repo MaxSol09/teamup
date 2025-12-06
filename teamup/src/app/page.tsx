@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { useFiltersStore, ThemeType, RoleType } from '@/store/filtersStore';
 import { THEMES, getTagsForTheme } from '@/config/themes';
 import { filterPosts, filterProjects, filterCommunities } from '@/utils/filterItems';
+import { useAuthStore } from '@/store/authStore';
 
 type TabType = 'posts' | 'projects' | 'communities';
 
@@ -120,6 +121,17 @@ function HomeContent() {
   };
   
   const hasActiveFilters = search || theme || tags.length > 0 || role;
+
+  const showProfileModal = useAuthStore((s) => s.showProfileModal);
+
+  useEffect(() => {
+  const shouldShow = localStorage.getItem("showProfileModal");
+
+  if (shouldShow === "true") {
+    useAuthStore.getState().openProfileModal();
+    localStorage.removeItem("showProfileModal");
+  }
+}, []);
 
   return (
     <MainLayout>
@@ -331,6 +343,7 @@ function HomeContent() {
         </div>
       </div>
     </MainLayout>
+    
   );
 }
 
@@ -347,3 +360,6 @@ export default function Home() {
     </Suspense>
   );
 }
+
+
+// {showProfileModal && <FinishProfileModal />}

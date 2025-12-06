@@ -3,8 +3,8 @@ import express from 'express'
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken';
 import cors from 'cors'
-import { User } from './models/UserModel';
-import { authMiddleware } from './middleware/authMiddleware';
+import { User } from './models/UserModel.js';
+import { authMiddleware } from './middleware/authMiddleware.js';
 
 configDotenv()
 

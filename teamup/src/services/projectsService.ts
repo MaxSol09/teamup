@@ -4,9 +4,7 @@ import axios from "axios"
 class ProjectsService {
 
     getProjects(){
-        const data = axios.get(API_ENDPOINTS.CONTENT.GET_POSTS)
-
-        return data
+        return 0
     }
 
 }

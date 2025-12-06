@@ -4,9 +4,8 @@ import axios from "axios"
 class CommunitiesService {
 
     getCommunities(){
-        const data = axios.get(API_ENDPOINTS.CONTENT.GET_POSTS)
 
-        return data
+        return 0
     }
 
 }

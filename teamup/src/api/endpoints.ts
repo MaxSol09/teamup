@@ -1,12 +1,9 @@
 const BASE_URL = 'http://localhost:4529'
 
 export const API_ENDPOINTS = {
-  AUTH: {
-    VK_LOGIN: "/api/auth/vk",
-    COMPLETE_PROFILE: "/api/profile/complete",
-  },
-
-  CONTENT: {
-    GET_POSTS: "/api/posts",
-  },
+    AUTH: {
+        LOGIN: `${BASE_URL}/vk/login`,
+        REGISTER: `${BASE_URL}/vk/register`,
+        GET_ME: `${BASE_URL}/me`
+    }
 };
