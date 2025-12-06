@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useMainStore } from '@/store/mainStore';
 import MainLayout from '@/components/MainLayout';
@@ -17,7 +17,7 @@ import { filterPosts, filterProjects, filterCommunities } from '@/utils/filterIt
 
 type TabType = 'posts' | 'projects' | 'communities';
 
-export default function Home() {
+function HomeContent() {
   const { activeTab, setActiveTab } = useMainStore();
   const { posts } = usePostsStore();
   const { projects } = useProjectStore();
@@ -331,5 +331,19 @@ export default function Home() {
         </div>
       </div>
     </MainLayout>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </MainLayout>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
