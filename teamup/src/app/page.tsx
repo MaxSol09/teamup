@@ -23,6 +23,9 @@ function HomeContent() {
   const { posts } = usePostsStore();
   const { projects } = useProjectStore();
   const { communities } = useCommunitiesStore();
+  const user = useAuthStore(u => u.user)
+
+  console.log('мои данные user >>> ', user)
   
   const {
     search,
