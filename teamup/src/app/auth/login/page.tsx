@@ -6,6 +6,10 @@ import { SocialButton } from '@/components/auth/SocialButton';
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
+  
+    const appId = '53108749'; // Замените на ваш client_id
+    const redirectUri = 'https://teamup-579l.vercel.app/'; // Замените на URL вашего приложения
+  
 
   useEffect(() => {
     setMounted(true);
@@ -14,12 +18,8 @@ export default function LoginPage() {
 
     const handleLogin = () => {
         const scope = 'email,offline'; // Укажите необходимые разрешения
-        window.location.href = `https://oauth.vk.com/authorize?client_id=${appId}&display=popup&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`;
+        window.location.href = `https://oauth.vk.com/authorize?client_id=${appId}&display=popup&redirect_uri=https://teamup-579l.vercel.app/&scope=${scope}&response_type=token&v=5.199`;
     };
-
-    const appId = '53108749'; // Замените на ваш client_id
-    const redirectUri = 'https://teamup-579l.vercel.app/'; // Замените на URL вашего приложения
-  
     useEffect(() => {
       // Получение параметров из URL hash (после редиректа)
       const hash = window.location.hash.substring(1); // Убираем '#'
