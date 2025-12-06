@@ -13,7 +13,7 @@ export default function LoginPage() {
   const { mutate: vkAuth } = useVkAuth();
   
     const appId = '53108749'; // Замените на ваш client_id
-    const redirectUri = 'https://malorie-preponderant-superprecisely.ngrok-free.dev/auth/login'; // Замените на URL вашего приложения
+    const redirectUri = 'https://teamup-579l.vercel.app/auth/login'; // Замените на URL вашего приложения
   
 
   useEffect(() => {
