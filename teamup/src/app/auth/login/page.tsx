@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
 import { useVkAuth } from '@/hooks/useVkLogin';
 import { openVkAuthPopup } from '@/utils/vkAuth';
-import { getBaseUrl } from '@/utils/getBaseUrl';
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
@@ -14,7 +13,7 @@ export default function LoginPage() {
   const { mutate: vkAuth } = useVkAuth();
 
   const appId = '53108749';
-  const redirectUri = `${getBaseUrl()}/auth/vk-callback`;
+  const redirectUri = `https://teamup-579l.vercel.app/auth/login`;
 
   useEffect(() => {
     setMounted(true);

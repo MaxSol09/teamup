@@ -14,7 +14,7 @@ export default function RegisterPage() {
   const { mutate: vkAuth } = useVkRegister();
 
   const appId = '53108749';
-  const redirectUri = `${getBaseUrl()}/auth/vk-callback`;
+  const redirectUri = `https://teamup-579l.vercel.app/auth/register`;
 
   useEffect(() => {
     setMounted(true);
