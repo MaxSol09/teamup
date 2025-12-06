@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useVkRegister } from '@/hooks/useVkRegister';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
