@@ -11,8 +11,16 @@ export const useVkAuth = () => {
   return useMutation({
     mutationFn: (vkId: string) => authService.loginWithVk(vkId),
 
-    onSuccess: ({ data }) => {
+    onSuccess: (response) => {
+      // axios возвращает { data: { token, user, ... }, status, headers, ... }
+      // React Query передает весь ответ axios в onSuccess
+      const data = response.data;
       const { token, user, isNew } = data;
+
+      if (!token) {
+        console.error('Token is missing in response:', response);
+        return;
+      }
 
       localStorage.setItem("token", token);
       setAuth(token, user);
