@@ -30,7 +30,7 @@ app.listen(4529, (err) => {
 })
 
 const corsConfig = {
-    origin: ['http://localhost:3000', 'http://localhost:5173', 'https://sfu-86v5.vercel.app', 'https://malorie-preponderant-superprecisely.ngrok-free.dev'],
+    origin: ['http://localhost:3000', 'https://teamup-579l.vercel.app/', 'http://localhost:5173', 'https://sfu-86v5.vercel.app', 'https://malorie-preponderant-superprecisely.ngrok-free.dev'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
 }

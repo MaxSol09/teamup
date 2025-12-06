@@ -18,7 +18,7 @@ export default function LoginPage() {
     };
 
     const appId = '53108749'; // Замените на ваш client_id
-    const redirectUri = 'https://test5383495.vercel.app/auth/login'; // Замените на URL вашего приложения
+    const redirectUri = 'https://teamup-579l.vercel.app/'; // Замените на URL вашего приложения
   
     useEffect(() => {
       // Получение параметров из URL hash (после редиректа)
