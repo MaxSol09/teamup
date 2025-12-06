@@ -9,6 +9,8 @@ const STATUS_OPTIONS: UserStatus[] = [
   'Открыт к предложениям',
   'Ищу команду',
   'Ищу проект',
+  'Ищу исполнителей',
+  'Не ищу сотрудничество',
 ];
 
 export default function CompleteProfileModal() {
