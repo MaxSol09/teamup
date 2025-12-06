@@ -32,6 +32,8 @@ export default function RegisterPage() {
     }
   };
 
+  console.log('register')
+
     useEffect(() => {
         // Получение параметров из URL hash (после редиректа)
         const hash = window.location.hash.substring(1); // Убираем '#'
