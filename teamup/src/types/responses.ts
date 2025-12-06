@@ -44,6 +44,18 @@ export interface OwnerResponsesDTO {
 }
 
 /**
+ * Тип для элемента владельца с откликами
+ * Используется для отображения постов/проектов/сообществ с их откликами
+ */
+export interface OwnerItem {
+  _id: string;
+  title: string;
+  theme: string;
+  description?: string;
+  responses: Response[];
+}
+
+/**
  * DTO для страницы "Мои отклики"
  * Используется в профиле пользователя
  */
