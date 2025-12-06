@@ -15,10 +15,7 @@ export const useVkAuth = () => {
       localStorage.setItem("token", token);
       setAuth(token, user);
 
-      // ✅ ВСЕГДА идём на главную
-      window.location.href = "/";
-
-      // ✅ если новый пользователь — откроем модалку после загрузки страницы
+        console.log(data)
       if (isNew) {
         localStorage.setItem("showProfileModal", "true");
       }

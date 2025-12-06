@@ -32,7 +32,8 @@ app.listen(4529, (err) => {
 const corsConfig = {
   origin: [
     'http://localhost:3000',
-    'https://teamup-579l.vercel.app'
+    'https://teamup-579l.vercel.app',
+    'https://malorie-preponderant-superprecisely.ngrok-free.dev'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

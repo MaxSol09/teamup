@@ -13,7 +13,7 @@ export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
 
   const appId = '53108749'; // Замените на ваш client_id
-  const redirectUri = 'https://teamup-579l.vercel.app/auth/register'; 
+  const redirectUri = 'https://malorie-preponderant-superprecisely.ngrok-free.dev/auth/register'; 
 
   const { mutate: vkAuth } = useVkRegister();
 
