@@ -4,28 +4,23 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { SocialButton } from '@/components/auth/SocialButton';
 import axios from 'axios';
+import { useVkRegister } from '@/hooks/useVkRegister';
 
 export const dynamic = 'force-dynamic';
 
 export default function RegisterPage() {
   const [mounted, setMounted] = useState(false);
 
+  const appId = '53108749'; // Замените на ваш client_id
+  const redirectUri = 'https://teamup-579l.vercel.app/auth/register'; 
+
+  const { mutate: vkAuth } = useVkRegister();
+
   useEffect(() => {
     setMounted(true);
   }, []);
   const [isLoading, setIsLoading] = useState<'vk' | 'max' | null>(null);
 
-  const handleVKRegister = async () => {
-      const { data } = await axios.post(`http://localhost:4529/vk`, {
-        vkId: 4782774
-    });
-
-    console.log('запрос выполнен', data)
-
-    
-
-    return data
-  };
 
   const handleMaxRegister = async () => {
     setIsLoading('max');
@@ -35,6 +30,33 @@ export default function RegisterPage() {
       setIsLoading(null);
     }
   };
+
+    useEffect(() => {
+        // Получение параметров из URL hash (после редиректа)
+        const hash = window.location.hash.substring(1); // Убираем '#'
+        const params = new URLSearchParams(hash);
+    
+        console.log(params.get('email'))
+    
+        const userId = params.get('user_id');
+    
+        if (userId) {
+        // Сохраняем токен (например, в localStorage)
+        localStorage.setItem('vk_userId', userId);
+    
+        // Получаем данные пользователя
+        vkAuth(userId);
+    
+        // Очищаем hash из URL (чтобы не было видно в истории браузера)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
+    
+    const handleVKRegister = () => {
+        const scope = 'email,offline'; // Укажите необходимые разрешения
+        window.location.href = `https://oauth.vk.com/authorize?client_id=${appId}&display=popup&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&v=5.199`;
+    };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-cyan-100 flex items-center justify-center px-4 py-12">
