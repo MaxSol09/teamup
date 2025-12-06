@@ -30,12 +30,15 @@ app.listen(4529, (err) => {
 })
 
 const corsConfig = {
-    origin: ['http://localhost:3000', 'https://teamup-579l.vercel.app/'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-}
+  origin: [
+    'http://localhost:3000',
+    'https://teamup-579l.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-app.use(cors(corsConfig))
+app.use(cors(corsConfig)); 
 
 
 app.post('/vk/login', async (req, res) => {
