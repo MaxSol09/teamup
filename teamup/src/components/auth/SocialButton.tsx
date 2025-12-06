@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface SocialButtonProps {
   provider: 'vk' | 'max';
@@ -59,6 +60,6 @@ const VKIcon: React.FC = () => (
 );
 
 const MaxIcon: React.FC = () => (
-  <img src="/max.png" alt="Max" className="w-[28px] h-[28px]" />
+  <Image src="/max.png" alt="Max" width={28} height={28} />
 );
 
