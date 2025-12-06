@@ -72,8 +72,8 @@ export const ProfileHeader = () => {
                             />
                             <input
                             type="text"
-                            value={user.role}
-                            onChange={(e) => updateUser({ role: e.target.value })}
+                            value={user.specialization}
+                            onChange={(e) => updateUser({ specialization: e.target.value })}
                             className="text-base text-gray-500 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Роль / специализация"
                             />
@@ -81,7 +81,7 @@ export const ProfileHeader = () => {
                         ) : (
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 items-center">{user.name}</h1>
-                            <p className="text-base text-gray-500">{user.role || 'Роль не указана'}</p>
+                            <p className="text-base text-gray-500">{user.specialization || 'Роль не указана'}</p>
                         </div>
                         )}
 
@@ -163,24 +163,24 @@ export const ProfileHeader = () => {
                             <>
                             <input
                                 type="text"
-                                value={user.github}
-                                onChange={(e) => updateUser({ github: e.target.value })}
+                                value={user.socials?.github}
+                                onChange={(e) => updateUser({ socials: { ...user.socials, github:e.target.value }})}
                                 placeholder="GitHub URL"
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                             />
                             <input
                                 type="text"
-                                value={user.telegram}
-                                onChange={(e) => updateUser({ telegram: e.target.value })}
+                                value={user.socials?.telegram}
+                                onChange={(e) => updateUser({ socials: {...user.socials, telegram: e.target.value }})}
                                 placeholder="Telegram URL"
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                             />
                             </>
                         ) : (
                             <>
-                            {user.github && (
+                            {user.socials?.github && (
                                 <a
-                                href={user.github}
+                                href={user.socials?.github}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors group"
@@ -195,9 +195,9 @@ export const ProfileHeader = () => {
                                 </svg>
                                 </a>
                             )}
-                            {user.telegram && (
+                            {user.socials?.telegram && (
                                 <a
-                                href={user.telegram}
+                                href={user.socials.telegram}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors group"
