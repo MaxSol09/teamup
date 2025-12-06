@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuth(token, data)
       })
       .catch(() => {
-        localStorage.removeItem('token')
+        console.log('произошла ошибочка')
       })
   }, [setAuth])
 

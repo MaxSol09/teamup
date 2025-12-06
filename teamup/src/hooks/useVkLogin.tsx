@@ -22,12 +22,11 @@ export const useVkAuth = () => {
         return;
       }
 
-      console.log('TTOOOKKEN >>> ', token)
-
       localStorage.setItem("token", token);
       setAuth(token, user);
 
       // ✅ ВСЕГДА идём на главную
+      router.push('/')
 
       // ✅ если новый пользователь — откроем модалку после загрузки страницы
       if (isNew) {
