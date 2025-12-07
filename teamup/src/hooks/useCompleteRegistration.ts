@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export const useCompleteRegistration = () => {
   const setUser = useAuthStore((s) => s.setUser);
+  const closeModal = useAuthStore(s => s.closeProfileModal)
   const router = useRouter();
 
   return useMutation({
@@ -14,8 +15,9 @@ export const useCompleteRegistration = () => {
       // ответ: { user }
       const { user } = data;
       setUser(user);
+
+      closeModal()
       // Закрыть модалку/редирект
-      router.push('/');
     },
     onError: (err: any) => {
       console.error('complete registration error', err);

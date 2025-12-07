@@ -3,7 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import { authMiddleware } from './middleware/authMiddleware.js';
-import { completeRegistration, getMe, loginVk, registerVk } from './controllers/aurhController.js';
+import { completeRegistration, getMe, loginVk, registerVk } from './controllers/authController.js';
 
 configDotenv()
 
