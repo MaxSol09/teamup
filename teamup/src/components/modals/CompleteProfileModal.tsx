@@ -151,7 +151,7 @@ export default function CompleteProfileModal() {
         {/* Modal */}
         <div className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden animate-scaleIn">
           {/* Header - более компактный */}
-          <div className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-500 via-indigo-400 to-purple-400 px-8 py-6">
             <h2 className="text-2xl font-bold text-white mb-1">
               Расскажите о себе
             </h2>
@@ -479,7 +479,7 @@ export default function CompleteProfileModal() {
                 disabled={!isFormValid || isPending}
                 className={`w-full py-3 rounded-xl font-semibold text-white transition-all duration-300 ${
                   isFormValid && !isPending
-                    ? 'bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
+                    ? 'bg-gradient-to-r from-blue-500 via-indigo-400 to-purple-400 hover:from-blue-600 hover:via-indigo-500 hover:to-purple-500 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
                     : 'bg-gray-300 cursor-not-allowed opacity-60'
                 }`}
               >
