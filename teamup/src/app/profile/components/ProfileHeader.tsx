@@ -46,6 +46,7 @@ export const ProfileHeader = () => {
   const [editedUser, setEditedUser] = useState<typeof user | null>(null);
   const [skillInput, setSkillInput] = useState('');
   const [interestInput, setInterestInput] = useState('');
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -121,6 +122,31 @@ export const ProfileHeader = () => {
     setEditedUser({
       ...editedUser,
       interests: editedUser.interests.filter((i) => i !== interest),
+    });
+  };
+
+  const handleStatusChange = (newStatus: UserStatus) => {
+    if (!user) return;
+    
+    const payload = {
+      name: user.name,
+      specialization: user.specialization,
+      about: user.about,
+      skills: user.skills,
+      interests: user.interests,
+      status: newStatus,
+      isOpenForInvites: user.isOpenForInvites,
+      socials: {
+        github: user.socials?.github,
+        telegram: user.socials?.telegram,
+      },
+    };
+
+    updateProfile(payload, {
+      onSuccess: (updatedUser) => {
+        setUser(updatedUser);
+        setIsEditingStatus(false);
+      },
     });
   };
 
@@ -211,10 +237,30 @@ export const ProfileHeader = () => {
                       </option>
                     ))}
                   </select>
+                ) : isEditingStatus ? (
+                  <select
+                    value={user.status}
+                    onChange={(e) => {
+                      handleStatusChange(e.target.value as UserStatus);
+                    }}
+                    onBlur={() => setIsEditingStatus(false)}
+                    autoFocus
+                    className={`px-3 py-1 rounded-full border text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${STATUS_COLORS[user.status]}`}
+                  >
+                    {STATUS_OPTIONS.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
-                  <span className={`px-3 py-1 rounded-full border text-sm font-medium ${STATUS_COLORS[user.status]}`}>
+                  <button
+                    onClick={() => setIsEditingStatus(true)}
+                    className={`px-3 py-1 rounded-full border text-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105 cursor-pointer ${STATUS_COLORS[user.status]}`}
+                    title="Нажмите, чтобы изменить статус"
+                  >
                     {user.status}
-                  </span>
+                  </button>
                 )}
                 
                 {/* Toggle для isOpenForInvites */}

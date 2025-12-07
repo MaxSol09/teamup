@@ -21,6 +21,7 @@ import { useCommunities } from '@/hooks/useCommunities';
 import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/cards/EventCard';
 import { Event } from '@/types/events';
+import { Loader2 } from 'lucide-react';
 
 type TabType = 'posts' | 'projects' | 'communities' | 'events';
 
@@ -336,8 +337,11 @@ function HomeContent() {
 
         {/* Состояние загрузки */}
         {isLoading && (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <div className="mt-4 flex items-center justify-center min-h-[200px]">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              <p className="text-sm text-gray-500">Загрузка...</p>
+            </div>
           </div>
         )}
 
@@ -459,8 +463,11 @@ export default function Home() {
   return (
     <Suspense fallback={
       <MainLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="mt-4 flex items-center justify-center min-h-[200px]">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            <p className="text-sm text-gray-500">Загрузка...</p>
+          </div>
         </div>
       </MainLayout>
     }>

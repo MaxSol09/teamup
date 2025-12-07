@@ -7,7 +7,7 @@ import CreateCommunityModal from '@/components/modals/CreateCommunityModal';
 interface CommunityFormData {
   name: string;
   description: string;
-  category: string;
+  theme: string;
   isPublic: boolean;
 }
 
