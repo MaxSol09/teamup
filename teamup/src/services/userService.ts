@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from '@/api/endpoints';
 import { User, UserStatus, UserSocials } from '@/types/user';
 
 export interface CompleteProfileData {
-  specialization: string;
+  specialization?: string; // необязательно (школьники)
   about: string;
   skills: string[];
   interests: string[];

@@ -1,5 +1,7 @@
 export type UserStatus = 'Ищу проект' | 'Ищу команду' | 'Ищу исполнителей' | 'Открыт к предложениям' | 'Не ищу сотрудничество';
 
+export type UserRole = 'observer' | 'user';
+
 export interface UserSocials {
   github?: string;
   telegram?: string;
@@ -20,7 +22,9 @@ export interface User {
   skills: string[];
 
   status: UserStatus;
-  isOpenForInvites: boolean,
+  isOpenForInvites: boolean;
+  
+  role?: UserRole; // observer - только просмотр, user - полный доступ
 
   socials?: UserSocials;
 
