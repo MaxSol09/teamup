@@ -22,6 +22,7 @@ export default function CompleteProfileModal() {
   const { mutate: completeProfile, isPending } = useCompleteProfile();
 
   // Form state
+  const [name, setName] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [about, setAbout] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
@@ -35,23 +36,23 @@ export default function CompleteProfileModal() {
   const [interestInput, setInterestInput] = useState('');
 
   const [errors, setErrors] = useState({
-    about: '',
+    name: '',
     skills: '',
     interests: '',
   });
 
-  // Валидация формы (specialization теперь необязательна!)
+  // Валидация формы
   const validateForm = (): boolean => {
     const newErrors = {
-      about: '',
+      name: '',
       skills: '',
       interests: '',
     };
 
     let isValid = true;
 
-    if (about.trim().length < 10) {
-      newErrors.about = 'Минимум 10 символов';
+    if (name.trim().length < 2) {
+      newErrors.name = 'Минимум 2 символа';
       isValid = false;
     }
 
@@ -69,9 +70,9 @@ export default function CompleteProfileModal() {
     return isValid;
   };
 
-  // Проверка можно ли активировать кнопку (specialization больше не требуется!)
+  // Проверка можно ли активировать кнопку
   const isFormValid =
-    about.trim().length >= 10 &&
+    name.trim().length >= 2 &&
     skills.length > 0 &&
     interests.length > 0;
 
@@ -82,7 +83,9 @@ export default function CompleteProfileModal() {
       if (!skills.includes(skillInput.trim())) {
         setSkills([...skills, skillInput.trim()]);
         setSkillInput('');
-        setErrors({ ...errors, skills: '' });
+        if (errors.skills) {
+          setErrors({ ...errors, skills: '' });
+        }
       }
     }
   };
@@ -97,7 +100,9 @@ export default function CompleteProfileModal() {
       if (!interests.includes(interestInput.trim())) {
         setInterests([...interests, interestInput.trim()]);
         setInterestInput('');
-        setErrors({ ...errors, interests: '' });
+        if (errors.interests) {
+          setErrors({ ...errors, interests: '' });
+        }
       }
     }
   };
@@ -114,8 +119,9 @@ export default function CompleteProfileModal() {
       const socials = github || telegram ? { github, telegram } : undefined;
 
       completeProfile({
+        name: name.trim(),
         specialization: specialization.trim() || undefined,
-        about: about.trim(),
+        about: about.trim() || undefined,
         skills,
         interests,
         status,
@@ -138,7 +144,7 @@ export default function CompleteProfileModal() {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-12 md:pt-16">
+      <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 md:pt-24">
         {/* Backdrop */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md animate-fadeIn" />
 
@@ -181,6 +187,34 @@ export default function CompleteProfileModal() {
                 Личность
               </h3>
 
+              {/* Name - ОБЯЗАТЕЛЬНО */}
+              <div className="mb-5">
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Имя <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setErrors({ ...errors, name: '' });
+                  }}
+                  placeholder="Как вас зовут?"
+                  className={`w-full px-4 py-3 border-2 ${
+                    errors.name ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-indigo-500'
+                  } rounded-xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all`}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+
               {/* Specialization - НЕОБЯЗАТЕЛЬНА */}
               <div className="mb-5">
                 <label htmlFor="specialization" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -202,39 +236,25 @@ export default function CompleteProfileModal() {
                 </p>
               </div>
 
-              {/* About - ОБЯЗАТЕЛЬНО */}
+              {/* About - НЕОБЯЗАТЕЛЬНО (рекомендуемое) */}
               <div className="mb-5">
                 <label htmlFor="about" className="block text-sm font-semibold text-gray-700 mb-2">
-                  О себе <span className="text-red-500">*</span>
+                  О себе
                 </label>
                 <textarea
                   id="about"
                   value={about}
-                  onChange={(e) => {
-                    setAbout(e.target.value);
-                    setErrors({ ...errors, about: '' });
-                  }}
+                  onChange={(e) => setAbout(e.target.value)}
                   placeholder="Расскажите кратко о себе, опыте, целях, чем можете быть полезны проектам..."
                   rows={4}
-                  className={`w-full px-4 py-3 border-2 ${
-                    errors.about ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-indigo-500'
-                  } rounded-xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all resize-none`}
+                  className="w-full px-4 py-3 border-2 border-gray-200 focus:border-indigo-500 rounded-xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all resize-none"
                 />
-                <div className="flex justify-between items-center mt-1.5">
-                  {errors.about ? (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      {errors.about}
-                    </p>
-                  ) : (
-                    <span className="text-sm text-gray-400">Минимум 10 символов</span>
-                  )}
-                  <p className={`text-sm font-medium ml-auto ${about.length >= 10 ? 'text-green-600' : 'text-gray-400'}`}>
-                    {about.length}
-                  </p>
-                </div>
+                <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  Рекомендуется заполнить, чтобы другие лучше вас узнали
+                </p>
               </div>
             </div>
 
