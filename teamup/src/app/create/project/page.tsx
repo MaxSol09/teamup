@@ -7,10 +7,8 @@ import CreateProjectModal from '@/components/modals/CreateProjectModal';
 interface ProjectFormData {
   title: string;
   description: string;
-  stage: 'idea' | 'MVP' | 'production';
-  lookingFor: string[];
   tags: string[];
-  contacts: string;
+  theme: string;
 }
 
 export default function CreateProjectPage() {
