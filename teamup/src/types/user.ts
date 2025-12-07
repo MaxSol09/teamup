@@ -20,6 +20,7 @@ export interface User {
   skills: string[];
 
   status: UserStatus;
+  isOpenForInvites: boolean,
 
   socials?: UserSocials;
 

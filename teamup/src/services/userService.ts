@@ -1,13 +1,15 @@
 import { api } from '@/api/axios';
 import { API_ENDPOINTS } from '@/api/endpoints';
-import { User } from '@/types/user';
+import { User, UserStatus, UserSocials } from '@/types/user';
 
 export interface CompleteProfileData {
   specialization: string;
   about: string;
   skills: string[];
   interests: string[];
-  status?: string;
+  status: UserStatus;
+  isOpenForInvites: boolean;
+  socials?: UserSocials;
 }
 
 export interface CompleteProfileResponse {

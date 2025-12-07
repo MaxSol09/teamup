@@ -31,6 +31,7 @@ const initialUser: User = {
   status: 'Ищу команду',
   updatedAt: '42847',
   createdAt: '8ubbubu',
+  isOpenForInvites: false,
   avatar: '',
 };
 

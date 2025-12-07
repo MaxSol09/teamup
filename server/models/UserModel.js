@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema(
       default: 'Открыт к предложениям',
     },
 
+    isOpenForInvites: {
+      type: Boolean,
+      default: false
+    },
+
     socials: {
       github: String,
       telegram: String,
@@ -51,7 +56,7 @@ const userSchema = new mongoose.Schema(
     isProfileCompleted: {
       type: Boolean,
       default: false,
-    },
+    }
   },
   { timestamps: true }
 );
