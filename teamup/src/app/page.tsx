@@ -18,12 +18,9 @@ import { useAuthStore } from '@/store/authStore';
 import { usePosts } from '@/hooks/usePosts';
 import { useProjects } from '@/hooks/useProjects';
 import { useCommunities } from '@/hooks/useCommunities';
-import { useEvents } from '@/hooks/useEvents';
-import { EventCard } from '@/components/cards/EventCard';
-import { Event } from '@/types/events';
 import { Loader2 } from 'lucide-react';
 
-type TabType = 'posts' | 'projects' | 'communities' | 'events';
+type TabType = 'posts' | 'projects' | 'communities';
 
 function HomeContent() {
   const { activeTab, setActiveTab } = useMainStore();
@@ -37,7 +34,6 @@ function HomeContent() {
   const { data: postsData, isLoading: isLoadingPosts, error: postsError } = usePosts();
   const { data: projectsData, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { data: communitiesData, isLoading: isLoadingCommunities, error: communitiesError } = useCommunities();
-  const { data: eventsData, isLoading: isLoadingEvents, error: eventsError } = useEvents();
 
   // Сохраняем данные в Zustand при успешной загрузке
   useEffect(() => {
@@ -58,7 +54,7 @@ function HomeContent() {
     }
   }, [communitiesData, setCommunities]);
 
-  const isLoading = isLoadingPosts || isLoadingProjects || isLoadingCommunities || isLoadingEvents;
+  const isLoading = isLoadingPosts || isLoadingProjects || isLoadingCommunities;
   
   const {
     search,
@@ -116,28 +112,6 @@ function HomeContent() {
   const filteredProjects = filterProjects(projects, { search, theme, tags, role });
   const filteredCommunities = filterCommunities(communities, { search, theme, tags, role });
   
-  // Фильтрация мероприятий
-  const filteredEvents = eventsData ? eventsData.filter((event: Event) => {
-    if (search) {
-      const searchLower = search.toLowerCase();
-      if (!event.title.toLowerCase().includes(searchLower) && 
-          !event.description.toLowerCase().includes(searchLower)) {
-        return false;
-      }
-    }
-    if (theme && event.theme !== theme) return false;
-    if (tags.length > 0 && !tags.some(tag => event.tags.includes(tag))) return false;
-    return true;
-  }) : [];
-  
-  // Проверка единомышленников для мероприятий
-  // Карточка подсвечивается, если среди участников есть единомышленники
-  const getIsLikeMinded = (event: Event) => {
-    if (!user) return false;
-    // Если есть единомышленники среди участников, подсвечиваем карточку
-    return event.likeMindedCount > 0;
-  };
-  
   // Получаем текущий список карточек в зависимости от активной вкладки
   const getCurrentItems = () => {
     switch (activeTab) {
@@ -147,8 +121,6 @@ function HomeContent() {
         return filteredProjects;
       case 'communities':
         return filteredCommunities;
-      case 'events':
-        return filteredEvents;
       default:
         return [];
     }
@@ -317,7 +289,7 @@ function HomeContent() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {(['posts', 'projects', 'communities', 'events'] as TabType[]).map((tab) => (
+          {(['posts', 'projects', 'communities'] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -330,7 +302,6 @@ function HomeContent() {
               {tab === 'posts' && 'Объявления'}
               {tab === 'projects' && 'Проекты'}
               {tab === 'communities' && 'Сообщества'}
-              {tab === 'events' && 'Мероприятия'}
             </button>
           ))}
         </div>
@@ -346,13 +317,12 @@ function HomeContent() {
         )}
 
         {/* Ошибки загрузки */}
-        {(postsError || projectsError || communitiesError || eventsError) && (
+        {(postsError || projectsError || communitiesError) && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <p className="text-red-800 text-sm">
               {activeTab === 'posts' && postsError && 'Ошибка загрузки объявлений'}
               {activeTab === 'projects' && projectsError && 'Ошибка загрузки проектов'}
               {activeTab === 'communities' && communitiesError && 'Ошибка загрузки сообществ'}
-              {activeTab === 'events' && eventsError && 'Ошибка загрузки мероприятий'}
             </p>
           </div>
         )}
@@ -426,31 +396,6 @@ function HomeContent() {
               )
             )}
 
-            {/* EVENTS */}
-            {activeTab === 'events' && (
-              filteredEvents.length > 0 ? (
-                filteredEvents.map((item: Event) => (
-                  <EventCard 
-                    key={`event-${item._id}`} 
-                    event={item} 
-                    isLikeMinded={getIsLikeMinded(item)}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full">
-                  <EmptyState
-                    title="Мероприятий не найдено"
-                    description={
-                      hasActiveFilters 
-                        ? "Попробуйте изменить параметры фильтрации"
-                        : "Пока нет доступных мероприятий"
-                    }
-                    buttonText={hasActiveFilters ? "Сбросить фильтры" : undefined}
-                    onClick={hasActiveFilters ? handleClearFilters : undefined}
-                  />
-                </div>
-              )
-            )}
           </div>
         )}
       </div>
