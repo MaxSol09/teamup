@@ -56,6 +56,12 @@ const userSchema = new mongoose.Schema(
     isProfileCompleted: {
       type: Boolean,
       default: false,
+    },
+
+    role: {
+      type: String,
+      enum: ['observer', 'user', 'admin'],
+      default: 'user',
     }
   },
   { timestamps: true }

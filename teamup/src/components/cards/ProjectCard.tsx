@@ -3,6 +3,7 @@
 import React from 'react';
 import { Project } from '@/types/project';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 interface ProjectCardProps {
   project: Project;
@@ -11,6 +12,8 @@ interface ProjectCardProps {
 
 export const ProjectCard = ({ project, hasResponded = false }: ProjectCardProps) => {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isOwner = user?._id === project.owner._id;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -115,12 +118,14 @@ export const ProjectCard = ({ project, hasResponded = false }: ProjectCardProps)
       </div>
 
       {/* Кнопка действия */}
-      <button
-        onClick={handleActionClick}
-        className="w-full px-4 py-2.5 rounded-lg font-medium text-sm bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 transition-colors"
-      >
-        {showChatButton ? 'Написать владельцу' : 'Откликнуться в проект'}
-      </button>
+      {!isOwner && (
+        <button
+          onClick={handleActionClick}
+          className="w-full px-4 py-2.5 rounded-lg font-medium text-sm bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 transition-colors"
+        >
+          {showChatButton ? 'Написать владельцу' : 'Откликнуться в проект'}
+        </button>
+      )}
     </div>
   );
 };

@@ -73,6 +73,69 @@ export const getMe = async (req, res) => {
   res.json(user);
 }
 
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const {
+      name,
+      specialization,
+      about,
+      skills,
+      interests,
+      status,
+      isOpenForInvites,
+      socials,
+    } = req.body;
+
+    const allowedStatuses = [
+      'Ищу проект',
+      'Ищу команду',
+      'Ищу исполнителей',
+      'Открыт к предложениям',
+      'Не ищу сотрудничество',
+    ];
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Некорректный статус пользователя' });
+    }
+
+    if (skills !== undefined && !Array.isArray(skills)) {
+      return res.status(400).json({ message: 'skills должен быть массивом' });
+    }
+
+    if (interests !== undefined && !Array.isArray(interests)) {
+      return res.status(400).json({ message: 'interests должен быть массивом' });
+    }
+
+    const update = {};
+    if (name !== undefined) update.name = name;
+    if (specialization !== undefined) update.specialization = specialization;
+    if (about !== undefined) update.about = about;
+    if (skills !== undefined) update.skills = skills;
+    if (interests !== undefined) update.interests = interests;
+    if (status !== undefined) update.status = status;
+    if (isOpenForInvites !== undefined) update.isOpenForInvites = Boolean(isOpenForInvites);
+    if (socials !== undefined) {
+      update.socials = {
+        github: socials.github || undefined,
+        telegram: socials.telegram || undefined,
+      };
+    }
+    update.updatedAt = new Date();
+
+    const user = await User.findByIdAndUpdate(userId, update, { new: true }).select('-__v');
+
+    if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
+
+    return res.json({ user });
+  } catch (err) {
+    console.error('update-profile error', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 export const registerVk =  async (req, res) => {
   const { vkId } = req.body;
 

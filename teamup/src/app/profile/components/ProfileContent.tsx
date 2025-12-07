@@ -1,86 +1,175 @@
+'use client';
+
 import { CommunityCard } from '@/components/cards/CommunityCard';
-import {PostCard} from '@/components/cards/PostCard';
+import { PostCard } from '@/components/cards/PostCard';
 import { ProjectCard } from '@/components/cards/ProjectCard';
-import { useCommunitiesStore } from '@/store/content/communities';
-import { usePostsStore } from '@/store/content/posts';
-import { useProjectStore } from '@/store/content/projects';
 import { useProfileStore } from '@/store/profileStore';
+import { useMyAds } from '@/hooks/useMyAds';
+import { useMyProjects } from '@/hooks/useMyProjects';
+import { useMyCommunities } from '@/hooks/useMyCommunities';
 import { MyResponses } from './MyResponses';
-import React from 'react'
+import {
+  FileText,
+  FolderKanban,
+  Users,
+  Plus,
+  MessageSquare,
+  Loader2,
+} from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
 
 export const ProfileContent = () => {
-
   const { activeTab } = useProfileStore();
-  
-  // Все хуки должны вызываться до условного return
-  const userCommunities = useCommunitiesStore(el => el.communities);
-  const userPosts = usePostsStore(el => el.posts)
-  const userProjects = useProjectStore(el => el.projects)
 
-  // Если выбрана вкладка "Мои отклики", показываем специальный компонент
+  const { data: myAds, isLoading: isLoadingAds, error: adsError } = useMyAds();
+  const { data: myProjects, isLoading: isLoadingProjects, error: projectsError } = useMyProjects();
+  const { data: myCommunities, isLoading: isLoadingCommunities, error: communitiesError } = useMyCommunities();
+
   if (activeTab === 'my-responses') {
     return <MyResponses />;
   }
 
+  const isLoading = 
+    (activeTab === 'posts' && isLoadingAds) ||
+    (activeTab === 'projects' && isLoadingProjects) ||
+    (activeTab === 'communities' && isLoadingCommunities);
+
+  const error = 
+    (activeTab === 'posts' && adsError) ||
+    (activeTab === 'projects' && projectsError) ||
+    (activeTab === 'communities' && communitiesError);
+
   const getCurrentItems = () => {
-    if (activeTab === 'posts') return userPosts;
-    if (activeTab === 'projects') return userProjects;
-    return userCommunities;
+    if (activeTab === 'posts') return myAds || [];
+    if (activeTab === 'projects') return myProjects || [];
+    return myCommunities || [];
   };
 
   const currentItems = getCurrentItems();
   const hasItems = currentItems.length > 0;
 
-  console.log(hasItems)
+  const getEmptyStateConfig = () => {
+    switch (activeTab) {
+      case 'posts':
+        return {
+          icon: <FileText className="w-10 h-10 text-gray-400" />,
+          title: 'Пока нет объявлений',
+          description:
+            'Создайте первое объявление, чтобы начать привлекать участников',
+          buttonText: 'Создать объявление',
+          buttonLink: '/create/post',
+        };
+      case 'projects':
+        return {
+          icon: <FolderKanban className="w-10 h-10 text-gray-400" />,
+          title: 'Пока нет проектов',
+          description:
+            'Создайте первый проект, чтобы начать сотрудничество',
+          buttonText: 'Создать проект',
+          buttonLink: '/create/project',
+        };
+      case 'communities':
+        return {
+          icon: <Users className="w-10 h-10 text-gray-400" />,
+          title: 'Пока нет сообществ',
+          description:
+            'Присоединитесь к сообществам или создайте свое',
+          buttonText: 'Создать сообщество',
+          buttonLink: '/create/community',
+        };
+      default:
+        return {
+          icon: <MessageSquare className="w-10 h-10 text-gray-400" />,
+          title: 'Нет данных',
+          description: 'Здесь пока ничего нет',
+          buttonText: '',
+          buttonLink: '',
+        };
+    }
+  };
+
+  const emptyState = getEmptyStateConfig();
+
+  if (isLoading) {
+    return (
+      <div className="mt-4 flex items-center justify-center min-h-[200px]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+          <p className="text-sm text-gray-500">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="text-center">
+          <p className="text-sm text-red-700">
+            Ошибка при загрузке данных. Попробуйте обновить страницу.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-6">
+    <div className="mt-4 animate-in fade-in duration-200">
       {hasItems ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activeTab === 'posts' &&
-            userPosts.map((item) => (
-              <PostCard key={item._id} post={item}/>
-          ))}
+            myAds?.map((item) => (
+              <div
+                key={item._id}
+                className="transition-all duration-200 hover:scale-105"
+              >
+                <PostCard post={item} />
+              </div>
+            ))}
           {activeTab === 'projects' &&
-            userProjects.map((item) => (
-              <ProjectCard key={item._id} project={item}/>
-          ))}
+            myProjects?.map((item) => (
+              <div
+                key={item._id}
+                className="transition-all duration-200 hover:scale-105"
+              >
+                <ProjectCard project={item} />
+              </div>
+            ))}
           {activeTab === 'communities' &&
-            userCommunities.map((item) => (
-              <CommunityCard key={item._id} community={item} />
+            myCommunities?.map((item) => (
+              <div
+                key={item._id}
+                className="transition-all duration-200 hover:scale-105"
+              >
+                <CommunityCard community={item} />
+              </div>
             ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm p-12 border border-gray-100">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <svg
-                className="w-8 h-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8 transition-all duration-200 hover:shadow-md">
+          <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4 transition-all duration-200 hover:scale-110">
+              {emptyState.icon}
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {activeTab === 'posts' && 'Пока нет объявлений'}
-              {activeTab === 'projects' && 'Пока нет проектов'}
-              {activeTab === 'communities' && 'Пока нет сообществ'}
+              {emptyState.title}
             </h3>
-            <p className="text-sm text-gray-500 max-w-sm">
-              {activeTab === 'posts' && 'Создайте первое объявление, чтобы начать привлекать участников'}
-              {activeTab === 'projects' && 'Создайте первый проект, чтобы начать сотрудничество'}
-              {activeTab === 'communities' && 'Присоединитесь к сообществам или создайте свое'}
+            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+              {emptyState.description}
             </p>
+            {emptyState.buttonLink && (
+              <Link
+                href={emptyState.buttonLink}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:scale-105 active:scale-95 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                {emptyState.buttonText}
+              </Link>
+            )}
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};

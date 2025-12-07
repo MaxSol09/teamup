@@ -3,6 +3,7 @@
 import React from 'react';
 import { Post } from '@/types/posts';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 interface PostCardProps {
   post: Post;
@@ -11,6 +12,8 @@ interface PostCardProps {
 
 export const PostCard = ({ post, hasResponded = false }: PostCardProps) => {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isOwner = user?._id === post.owner._id;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -108,17 +111,19 @@ export const PostCard = ({ post, hasResponded = false }: PostCardProps) => {
       </div>
 
       {/* Кнопка отклика */}
-      <button
-        onClick={handleRespondClick}
-        disabled={hasResponded}
-        className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-          hasResponded
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
-        }`}
-      >
-        {hasResponded ? 'Отклик отправлен' : 'Откликнуться'}
-      </button>
+      {!isOwner && (
+        <button
+          onClick={handleRespondClick}
+          disabled={hasResponded}
+          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
+            hasResponded
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
+          }`}
+        >
+          {hasResponded ? 'Отклик отправлен' : 'Откликнуться'}
+        </button>
+      )}
     </div>
   );
 };

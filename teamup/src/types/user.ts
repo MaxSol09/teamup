@@ -1,6 +1,6 @@
 export type UserStatus = 'Ищу проект' | 'Ищу команду' | 'Ищу исполнителей' | 'Открыт к предложениям' | 'Не ищу сотрудничество';
 
-export type UserRole = 'observer' | 'user';
+export type UserRole = 'observer' | 'user' | 'admin';
 
 export interface UserSocials {
   github?: string;

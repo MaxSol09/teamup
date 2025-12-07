@@ -679,3 +679,4 @@ export const completeProfile = async (req, res) => {
 
 **Всё готово к интеграции!** 🎉
 
+

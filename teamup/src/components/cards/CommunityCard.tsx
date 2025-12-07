@@ -3,6 +3,7 @@
 import React from 'react';
 import { Community } from '@/types/communities';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 interface CommunityCardProps {
   community: Community;
@@ -11,6 +12,8 @@ interface CommunityCardProps {
 
 export const CommunityCard = ({ community, hasJoined = false }: CommunityCardProps) => {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isOwner = user?._id === community.owner._id;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -123,21 +126,23 @@ export const CommunityCard = ({ community, hasJoined = false }: CommunityCardPro
       </div>
 
       {/* Кнопка действия */}
-      <button
-        onClick={handleActionClick}
-        disabled={hasJoined}
-        className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-          hasJoined
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
-        }`}
-      >
-        {hasJoined
-          ? 'Вы участник'
-          : community.isPublic
-          ? 'Вступить'
-          : 'Отправить заявку'}
-      </button>
+      {!isOwner && (
+        <button
+          onClick={handleActionClick}
+          disabled={hasJoined}
+          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
+            hasJoined
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
+          }`}
+        >
+          {hasJoined
+            ? 'Вы участник'
+            : community.isPublic
+            ? 'Вступить'
+            : 'Отправить заявку'}
+        </button>
+      )}
     </div>
   );
 };

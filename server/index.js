@@ -3,7 +3,10 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import { authMiddleware } from './middleware/authMiddleware.js';
-import { completeRegistration, getMe, loginVk, registerVk } from './controllers/authController.js';
+import { adminMiddleware } from './middleware/adminMiddleware.js';
+import { completeRegistration, getMe, loginVk, registerVk, updateProfile } from './controllers/authController.js';
+import { createAd, createCommunity, createProject, getAds, getCommunities, getProjects, getMyAds, getMyProjects, getMyCommunities } from './controllers/postsController.js';
+import { createEvent, getEvents, joinEvent, leaveEvent, getMyEvents, updateEvent, deleteEvent, getEventParticipants } from './controllers/eventsController.js';
 
 configDotenv()
 
@@ -109,4 +112,31 @@ app.post('/vk/register', registerVk);
 
 app.get('/me', authMiddleware, getMe);
 
+app.put('/profile', authMiddleware, updateProfile);
+
 app.post('/complete-registration', authMiddleware, completeRegistration)
+
+app.post('/create/ad', authMiddleware, createAd)
+
+app.post('/create/project', authMiddleware, createProject)
+
+app.post('/create/community', authMiddleware, createCommunity);
+
+
+app.get('/projects', getProjects)
+app.get('/ads', getAds)
+app.get('/communities', getCommunities)
+
+app.get('/ads/my', authMiddleware, getMyAds)
+app.get('/projects/my', authMiddleware, getMyProjects)
+app.get('/communities/my', authMiddleware, getMyCommunities)
+
+// Events routes
+app.post('/events', authMiddleware, adminMiddleware, createEvent)
+app.get('/events', getEvents)
+app.post('/events/:id/join', authMiddleware, joinEvent)
+app.post('/events/:id/leave', authMiddleware, leaveEvent)
+app.get('/events/my', authMiddleware, getMyEvents)
+app.put('/events/:id', authMiddleware, adminMiddleware, updateEvent)
+app.delete('/events/:id', authMiddleware, adminMiddleware, deleteEvent)
+app.get('/events/:id/participants', authMiddleware, getEventParticipants)

@@ -4,12 +4,15 @@ export interface Community {
   description: string;
   theme: string;
   tags: string[];
+
+  isPublic: boolean;
+
   owner: {
     _id: string;
     name: string;
     avatar?: string;
   };
-  isPublic: boolean; // Только у сообществ
-  membersCount: number;
+
   createdAt: string;
+  updatedAt: string;
 }

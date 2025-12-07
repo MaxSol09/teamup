@@ -8,6 +8,7 @@ interface FilterParams {
   theme: ThemeType;
   tags: string[];
   role: RoleType;
+  isActive?: boolean | null;
 }
 
 /**
@@ -73,16 +74,21 @@ function matchesRole(item: Post | Project | Community, role: RoleType): boolean 
  */
 export function filterPosts(posts: Post[], filters: FilterParams): Post[] {
   return posts.filter(post => {
-    // 1. Фильтр по тематике
+    // 1. Фильтр по активности (только для постов)
+    if (filters.isActive !== null && filters.isActive !== undefined) {
+      if (post.isActive !== filters.isActive) return false;
+    }
+    
+    // 2. Фильтр по тематике
     if (!matchesTheme(post, filters.theme)) return false;
     
-    // 2. Фильтр по тегам
+    // 3. Фильтр по тегам
     if (!matchesTags(post, filters.tags)) return false;
     
-    // 3. Фильтр по роли
+    // 4. Фильтр по роли
     if (!matchesRole(post, filters.role)) return false;
     
-    // 4. Поиск по тексту
+    // 5. Поиск по тексту
     if (!matchesSearch(post, filters.search)) return false;
     
     return true;
@@ -114,3 +120,4 @@ export function filterCommunities(communities: Community[], filters: FilterParam
     return true;
   });
 }
+

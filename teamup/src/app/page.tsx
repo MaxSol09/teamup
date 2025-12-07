@@ -15,31 +15,63 @@ import { useFiltersStore, ThemeType, RoleType } from '@/store/filtersStore';
 import { THEMES, getTagsForTheme } from '@/config/themes';
 import { filterPosts, filterProjects, filterCommunities } from '@/utils/filterItems';
 import { useAuthStore } from '@/store/authStore';
+import { usePosts } from '@/hooks/usePosts';
+import { useProjects } from '@/hooks/useProjects';
+import { useCommunities } from '@/hooks/useCommunities';
+import { useEvents } from '@/hooks/useEvents';
+import { EventCard } from '@/components/cards/EventCard';
+import { Event } from '@/types/events';
 
-type TabType = 'posts' | 'projects' | 'communities';
+type TabType = 'posts' | 'projects' | 'communities' | 'events';
 
 function HomeContent() {
   const { activeTab, setActiveTab } = useMainStore();
-  const { posts } = usePostsStore();
-  const { projects } = useProjectStore();
-  const { communities } = useCommunitiesStore();
+  const { posts, setPosts } = usePostsStore();
+  const { projects, setProjects } = useProjectStore();
+  const { communities, setCommunities } = useCommunitiesStore();
   const user = useAuthStore(u => u.user)
+  const router = useRouter();
 
-  console.log('мои данные user >>> ', user)
+  // React Query хуки для загрузки данных
+  const { data: postsData, isLoading: isLoadingPosts, error: postsError } = usePosts();
+  const { data: projectsData, isLoading: isLoadingProjects, error: projectsError } = useProjects();
+  const { data: communitiesData, isLoading: isLoadingCommunities, error: communitiesError } = useCommunities();
+  const { data: eventsData, isLoading: isLoadingEvents, error: eventsError } = useEvents();
+
+  // Сохраняем данные в Zustand при успешной загрузке
+  useEffect(() => {
+    if (postsData) {
+      setPosts(postsData);
+    }
+  }, [postsData, setPosts]);
+
+  useEffect(() => {
+    if (projectsData) {
+      setProjects(projectsData);
+    }
+  }, [projectsData, setProjects]);
+
+  useEffect(() => {
+    if (communitiesData) {
+      setCommunities(communitiesData);
+    }
+  }, [communitiesData, setCommunities]);
+
+  const isLoading = isLoadingPosts || isLoadingProjects || isLoadingCommunities || isLoadingEvents;
   
   const {
     search,
     theme,
     tags,
     role,
+    isActive,
     setSearch,
     setTheme,
     setTags,
-    setRole,
+    setRole
   } = useFiltersStore();
   
   const searchParams = useSearchParams();
-  const router = useRouter();
   
   // Синхронизация с URL при загрузке (только один раз)
   useEffect(() => {
@@ -79,9 +111,31 @@ function HomeContent() {
   const availableTags = theme ? getTagsForTheme(theme) : [];
   
   // Применяем фильтры
-  const filteredPosts = filterPosts(posts, { search, theme, tags, role });
+  const filteredPosts = filterPosts(posts, { search, theme, tags, role, isActive });
   const filteredProjects = filterProjects(projects, { search, theme, tags, role });
   const filteredCommunities = filterCommunities(communities, { search, theme, tags, role });
+  
+  // Фильтрация мероприятий
+  const filteredEvents = eventsData ? eventsData.filter((event: Event) => {
+    if (search) {
+      const searchLower = search.toLowerCase();
+      if (!event.title.toLowerCase().includes(searchLower) && 
+          !event.description.toLowerCase().includes(searchLower)) {
+        return false;
+      }
+    }
+    if (theme && event.theme !== theme) return false;
+    if (tags.length > 0 && !tags.some(tag => event.tags.includes(tag))) return false;
+    return true;
+  }) : [];
+  
+  // Проверка единомышленников для мероприятий
+  // Карточка подсвечивается, если среди участников есть единомышленники
+  const getIsLikeMinded = (event: Event) => {
+    if (!user) return false;
+    // Если есть единомышленники среди участников, подсвечиваем карточку
+    return event.likeMindedCount > 0;
+  };
   
   // Получаем текущий список карточек в зависимости от активной вкладки
   const getCurrentItems = () => {
@@ -92,6 +146,8 @@ function HomeContent() {
         return filteredProjects;
       case 'communities':
         return filteredCommunities;
+      case 'events':
+        return filteredEvents;
       default:
         return [];
     }
@@ -260,7 +316,7 @@ function HomeContent() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {(['posts', 'projects', 'communities'] as TabType[]).map((tab) => (
+          {(['posts', 'projects', 'communities', 'events'] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -273,77 +329,126 @@ function HomeContent() {
               {tab === 'posts' && 'Объявления'}
               {tab === 'projects' && 'Проекты'}
               {tab === 'communities' && 'Сообщества'}
+              {tab === 'events' && 'Мероприятия'}
             </button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* POSTS */}
-          {activeTab === 'posts' && (
-            filteredPosts.length > 0 ? (
-              filteredPosts.map((item) => (
-                <PostCard key={`post-${item._id}`} post={item} />
-              ))
-            ) : (
-              <div className="col-span-full">
-                <EmptyState
-                  title="Объявлений не найдено"
-                  description={
-                    hasActiveFilters 
-                      ? "Попробуйте изменить параметры фильтрации"
-                      : "Будь первым, кто создаст объявление"
-                  }
-                  buttonText={hasActiveFilters ? "Сбросить фильтры" : "Создать объявление"}
-                  onClick={hasActiveFilters ? handleClearFilters : () => console.log('create post')}
-                />
-              </div>
-            )
-          )}
+        {/* Состояние загрузки */}
+        {isLoading && (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          </div>
+        )}
 
-          {/* PROJECTS */}
-          {activeTab === 'projects' && (
-            filteredProjects.length > 0 ? (
-              filteredProjects.map((item) => (
-                <ProjectCard key={`project-${item._id}`} project={item} />
-              ))
-            ) : (
-              <div className="col-span-full">
-                <EmptyState
-                  title="Проектов не найдено"
-                  description={
-                    hasActiveFilters 
-                      ? "Попробуйте изменить параметры фильтрации"
-                      : "Создай первый проект и собери команду"
-                  }
-                  buttonText={hasActiveFilters ? "Сбросить фильтры" : "Создать проект"}
-                  onClick={hasActiveFilters ? handleClearFilters : () => console.log('create project')}
-                />
-              </div>
-            )
-          )}
+        {/* Ошибки загрузки */}
+        {(postsError || projectsError || communitiesError || eventsError) && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800 text-sm">
+              {activeTab === 'posts' && postsError && 'Ошибка загрузки объявлений'}
+              {activeTab === 'projects' && projectsError && 'Ошибка загрузки проектов'}
+              {activeTab === 'communities' && communitiesError && 'Ошибка загрузки сообществ'}
+              {activeTab === 'events' && eventsError && 'Ошибка загрузки мероприятий'}
+            </p>
+          </div>
+        )}
 
-          {/* COMMUNITIES */}
-          {activeTab === 'communities' && (
-            filteredCommunities.length > 0 ? (
-              filteredCommunities.map((item) => (
-                <CommunityCard key={`community-${item._id}`} community={item} />
-              ))
-            ) : (
-              <div className="col-span-full">
-                <EmptyState
-                  title="Сообществ не найдено"
-                  description={
-                    hasActiveFilters 
-                      ? "Попробуйте изменить параметры фильтрации"
-                      : "Создай первое сообщество по интересам"
-                  }
-                  buttonText={hasActiveFilters ? "Сбросить фильтры" : "Создать сообщество"}
-                  onClick={hasActiveFilters ? handleClearFilters : () => console.log('create community')}
-                />
-              </div>
-            )
-          )}
-        </div>
+        {/* Контент */}
+        {!isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* POSTS */}
+            {activeTab === 'posts' && (
+              filteredPosts.length > 0 ? (
+                filteredPosts.map((item) => (
+                  <PostCard key={`post-${item._id}`} post={item} />
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <EmptyState
+                    title="Объявлений не найдено"
+                    description={
+                      hasActiveFilters 
+                        ? "Попробуйте изменить параметры фильтрации"
+                        : "Будь первым, кто создаст объявление"
+                    }
+                    buttonText={hasActiveFilters ? "Сбросить фильтры" : "Создать объявление"}
+                    onClick={hasActiveFilters ? handleClearFilters : () => useMainStore.getState().openAdModal()}
+                  />
+                </div>
+              )
+            )}
+
+            {/* PROJECTS */}
+            {activeTab === 'projects' && (
+              filteredProjects.length > 0 ? (
+                filteredProjects.map((item) => (
+                  <ProjectCard key={`project-${item._id}`} project={item} />
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <EmptyState
+                    title="Проектов не найдено"
+                    description={
+                      hasActiveFilters 
+                        ? "Попробуйте изменить параметры фильтрации"
+                        : "Создай первый проект и собери команду"
+                    }
+                    buttonText={hasActiveFilters ? "Сбросить фильтры" : "Создать проект"}
+                    onClick={hasActiveFilters ? handleClearFilters : () => useMainStore.getState().openProjectModal()}
+                  />
+                </div>
+              )
+            )}
+
+            {/* COMMUNITIES */}
+            {activeTab === 'communities' && (
+              filteredCommunities.length > 0 ? (
+                filteredCommunities.map((item) => (
+                  <CommunityCard key={`community-${item._id}`} community={item} />
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <EmptyState
+                    title="Сообществ не найдено"
+                    description={
+                      hasActiveFilters 
+                        ? "Попробуйте изменить параметры фильтрации"
+                        : "Создай первое сообщество по интересам"
+                    }
+                    buttonText={hasActiveFilters ? "Сбросить фильтры" : "Создать сообщество"}
+                    onClick={hasActiveFilters ? handleClearFilters : () => useMainStore.getState().openCommunityModal()}
+                  />
+                </div>
+              )
+            )}
+
+            {/* EVENTS */}
+            {activeTab === 'events' && (
+              filteredEvents.length > 0 ? (
+                filteredEvents.map((item: Event) => (
+                  <EventCard 
+                    key={`event-${item._id}`} 
+                    event={item} 
+                    isLikeMinded={getIsLikeMinded(item)}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <EmptyState
+                    title="Мероприятий не найдено"
+                    description={
+                      hasActiveFilters 
+                        ? "Попробуйте изменить параметры фильтрации"
+                        : "Пока нет доступных мероприятий"
+                    }
+                    buttonText={hasActiveFilters ? "Сбросить фильтры" : undefined}
+                    onClick={hasActiveFilters ? handleClearFilters : undefined}
+                  />
+                </div>
+              )
+            )}
+          </div>
+        )}
       </div>
     </MainLayout>
     

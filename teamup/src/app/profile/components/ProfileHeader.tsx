@@ -1,230 +1,529 @@
-import { useProfileStore } from '@/store/profileStore';
-import React, { useState } from 'react'
+'use client';
+
+import { useMe } from '@/hooks/useMe';
+import { useUpdateProfile } from '@/hooks/useUpdateProfile';
+import { useAuthStore } from '@/store/authStore';
+import { UserStatus } from '@/types/user';
+import {
+  Edit2,
+  Save,
+  X,
+  Github,
+  Send,
+  Plus,
+  X as XIcon,
+  User,
+  Briefcase,
+  Heart,
+  Globe,
+  CheckCircle2,
+  Circle,
+} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
+const STATUS_OPTIONS: UserStatus[] = [
+  'Ищу проект',
+  'Ищу команду',
+  'Ищу исполнителей',
+  'Открыт к предложениям',
+  'Не ищу сотрудничество',
+];
+
+const STATUS_COLORS: Record<UserStatus, string> = {
+  'Ищу проект': 'bg-blue-100 text-blue-700 border-blue-200',
+  'Ищу команду': 'bg-purple-100 text-purple-700 border-purple-200',
+  'Ищу исполнителей': 'bg-green-100 text-green-700 border-green-200',
+  'Открыт к предложениям': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  'Не ищу сотрудничество': 'bg-gray-100 text-gray-700 border-gray-200',
+};
 
 export const ProfileHeader = () => {
+  const { data: user, isLoading } = useMe();
+  const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { setUser } = useAuthStore();
 
-    const { user, isEditing, toggleEdit, updateUser, addSkill, removeSkill } = useProfileStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState<typeof user | null>(null);
+  const [skillInput, setSkillInput] = useState('');
+  const [interestInput, setInterestInput] = useState('');
 
-    const [skillInput, setSkillInput] = useState('');
+  useEffect(() => {
+    if (user) {
+      setEditedUser({ ...user });
+      setUser(user);
+    }
+  }, [user, setUser]);
 
-    const handleAddSkill = () => {
-        if (skillInput.trim() && !user.skills.includes(skillInput.trim())) {
-        addSkill(skillInput.trim());
-        setSkillInput('');
-        }
+  const handleSave = () => {
+    if (!editedUser) return;
+
+    const payload = {
+      name: editedUser.name,
+      specialization: editedUser.specialization,
+      about: editedUser.about,
+      skills: editedUser.skills,
+      interests: editedUser.interests,
+      status: editedUser.status,
+      isOpenForInvites: editedUser.isOpenForInvites,
+      socials: {
+        github: editedUser.socials?.github,
+        telegram: editedUser.socials?.telegram,
+      },
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-        handleAddSkill();
-        }
-    };
+    updateProfile(payload, {
+      onSuccess: (updatedUser) => {
+        setUser(updatedUser);
+        setIsEditing(false);
+      },
+    });
+  };
 
+  const handleCancel = () => {
+    if (user) {
+      setEditedUser({ ...user });
+    }
+    setIsEditing(false);
+  };
 
+  const handleAddSkill = () => {
+    if (!editedUser || !skillInput.trim()) return;
+    if (editedUser.skills.includes(skillInput.trim())) return;
+
+    setEditedUser({
+      ...editedUser,
+      skills: [...editedUser.skills, skillInput.trim()],
+    });
+    setSkillInput('');
+  };
+
+  const handleRemoveSkill = (skill: string) => {
+    if (!editedUser) return;
+    setEditedUser({
+      ...editedUser,
+      skills: editedUser.skills.filter((s) => s !== skill),
+    });
+  };
+
+  const handleAddInterest = () => {
+    if (!editedUser || !interestInput.trim()) return;
+    if (editedUser.interests.includes(interestInput.trim())) return;
+
+    setEditedUser({
+      ...editedUser,
+      interests: [...editedUser.interests, interestInput.trim()],
+    });
+    setInterestInput('');
+  };
+
+  const handleRemoveInterest = (interest: string) => {
+    if (!editedUser) return;
+    setEditedUser({
+      ...editedUser,
+      interests: editedUser.interests.filter((i) => i !== interest),
+    });
+  };
+
+  if (isLoading || !user || !editedUser) {
     return (
-        <div className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-            {/* Left: Avatar */}
-                <div className="flex-shrink-0 flex justify-center md:justify-start">
-                    <div className="relative w-24 h-24 group">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-2xl shadow-md">
-                        {user.avatar ? (
-                        <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                        (user.name || '?').charAt(0).toUpperCase()
-                        )}
-                    </div>
-                    <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center cursor-pointer">
-                        <svg
-                            className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                            />
-                            <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                        </svg>
-                    </div>
-                    </div>
-                </div>
-                {/* Right: Profile Info */}
-                <div className="flex-1 flex flex-col gap-4">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div className="flex-1">
-                        {isEditing ? (
-                        <div className="space-y-3">
-                            <input
-                            type="text"
-                            value={user.name}
-                            onChange={(e) => updateUser({ name: e.target.value })}
-                            className="text-2xl md:text-3xl font-bold text-gray-900 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Имя"
-                            />
-                            <input
-                            type="text"
-                            value={user.specialization}
-                            onChange={(e) => updateUser({ specialization: e.target.value })}
-                            className="text-base text-gray-500 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Роль / специализация"
-                            />
-                        </div>
-                        ) : (
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 items-center">{user.name}</h1>
-                            <p className="text-base text-gray-500">{user.specialization || 'Роль не указана'}</p>
-                        </div>
-                        )}
-
-                        {/* About Section */}
-                        <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">О себе</label>
-                        {isEditing ? (
-                            <textarea
-                            value={user.about}
-                            onChange={(e) => updateUser({ about: e.target.value })}
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
-                            placeholder="Расскажите о себе"
-                            />
-                        ) : (
-                            <p className="text-sm text-gray-600 mt-1">{user.about || 'Описание отсутствует'}</p>
-                        )}
-                        </div>
-
-                        {/* Skills Section */}
-                        <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Навыки</label>
-                        {isEditing ? (
-                            <div className="space-y-2">
-                            <div className="flex gap-2">
-                                <input
-                                type="text"
-                                value={skillInput}
-                                onChange={(e) => setSkillInput(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                placeholder="Добавить навык"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                />
-                                <button
-                                onClick={handleAddSkill}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                                >
-                                Добавить
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {user.skills.map((skill) => (
-                                <span
-                                    key={skill}
-                                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm"
-                                >
-                                    {skill}
-                                    <button
-                                    onClick={() => removeSkill(skill)}
-                                    className="text-blue-600 hover:text-blue-800 font-semibold"
-                                    >
-                                    ×
-                                    </button>
-                                </span>
-                                ))}
-                            </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-wrap gap-2">
-                            {user.skills.length > 0 ? (
-                                user.skills.map((skill) => (
-                                <span
-                                    key={skill}
-                                    className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium"
-                                >
-                                    {skill}
-                                </span>
-                                ))
-                            ) : (
-                                <span className="text-gray-500 text-sm">Навыки отсутствуют</span>
-                            )}
-                            </div>
-                        )}
-                        </div>
-
-                        {/* Social Links */}
-                        <div className="flex gap-3 mt-4">
-                        {isEditing ? (
-                            <>
-                            <input
-                                type="text"
-                                value={user.socials?.github}
-                                onChange={(e) => updateUser({ socials: { ...user.socials, github:e.target.value }})}
-                                placeholder="GitHub URL"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            />
-                            <input
-                                type="text"
-                                value={user.socials?.telegram}
-                                onChange={(e) => updateUser({ socials: {...user.socials, telegram: e.target.value }})}
-                                placeholder="Telegram URL"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            />
-                            </>
-                        ) : (
-                            <>
-                            {user.socials?.github && (
-                                <a
-                                href={user.socials?.github}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors group"
-                                title="GitHub"
-                                >
-                                <svg
-                                    className="w-5 h-5 text-gray-600 group-hover:text-gray-900"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                                </svg>
-                                </a>
-                            )}
-                            {user.socials?.telegram && (
-                                <a
-                                href={user.socials.telegram}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors group"
-                                title="Telegram"
-                                >
-                                <svg
-                                    className="w-5 h-5 text-gray-600 group-hover:text-gray-900"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.559z" />
-                                </svg>
-                                </a>
-                            )}
-                            </>
-                        )}
-                        </div>
-                    </div>
-                    {/* Edit Button */}
-                    <div className="flex justify-end">
-                        <button onClick={toggleEdit} className="px-5 py-2 rounded-xl border border-blue-500 text-blue-600 hover:bg-blue-50 transition">
-                            {isEditing ? 'Сохранить' : 'Редактировать профиль'}
-                        </button>
-                    </div>
-                    </div>
-                </div>
-            </div>
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-24 w-24 rounded-full bg-gray-200 mb-4"></div>
+          <div className="h-8 w-48 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 w-32 bg-gray-200 rounded"></div>
         </div>
-  )
-}
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      {/* Верхняя строка: Аватар, имя, статус, кнопка */}
+      <div className="flex items-start gap-4 mb-6">
+        {/* Аватар */}
+        <div className="flex-shrink-0">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-0.5 shadow-md">
+            <div className="w-full h-full rounded-full bg-white p-0.5">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-3xl">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  (user.name || '?').charAt(0).toUpperCase()
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Имя, специализация, статус */}
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <div className="space-y-2 mb-3">
+              <input
+                type="text"
+                value={editedUser.name || ''}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, name: e.target.value })
+                }
+                className="text-2xl font-bold text-gray-900 w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                placeholder="Имя"
+              />
+              <input
+                type="text"
+                value={editedUser.specialization || ''}
+                onChange={(e) =>
+                  setEditedUser({
+                    ...editedUser,
+                    specialization: e.target.value,
+                  })
+                }
+                className="text-base text-gray-500 w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                placeholder="Роль / специализация"
+              />
+            </div>
+          ) : (
+            <div className="mb-3">
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                {user.name || 'Без имени'}
+              </h1>
+              <p className="text-base text-gray-500 mb-2">
+                {user.specialization || 'Роль не указана'}
+              </p>
+              <div className="flex items-center gap-3 flex-wrap">
+                {isEditing ? (
+                  <select
+                    value={editedUser.status}
+                    onChange={(e) =>
+                      setEditedUser({
+                        ...editedUser,
+                        status: e.target.value as UserStatus,
+                      })
+                    }
+                    className={`px-3 py-1 rounded-full border text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${STATUS_COLORS[editedUser.status]}`}
+                  >
+                    {STATUS_OPTIONS.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className={`px-3 py-1 rounded-full border text-sm font-medium ${STATUS_COLORS[user.status]}`}>
+                    {user.status}
+                  </span>
+                )}
+                
+                {/* Toggle для isOpenForInvites */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isEditing ? editedUser.isOpenForInvites : user.isOpenForInvites}
+                    onChange={(e) =>
+                      isEditing
+                        ? setEditedUser({
+                            ...editedUser,
+                            isOpenForInvites: e.target.checked,
+                          })
+                        : undefined
+                    }
+                    disabled={!isEditing}
+                    className="sr-only"
+                  />
+                  <div className="relative">
+                    <div
+                      className={`w-10 h-5 rounded-full transition-colors duration-200 ${
+                        (isEditing ? editedUser.isOpenForInvites : user.isOpenForInvites)
+                          ? 'bg-green-500'
+                          : 'bg-gray-300'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${
+                          (isEditing ? editedUser.isOpenForInvites : user.isOpenForInvites)
+                            ? 'translate-x-5'
+                            : 'translate-x-0'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-700 font-medium">
+                    Открыт для приглашений
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Кнопка редактирования */}
+        <div className="flex-shrink-0">
+          {isEditing ? (
+            <div className="flex gap-2">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all duration-200 flex items-center gap-2 text-sm font-medium hover:scale-105 active:scale-95"
+              >
+                <X className="w-4 h-4" />
+                Отменить
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isPending}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+              >
+                <Save className="w-4 h-4" />
+                {isPending ? 'Сохранение...' : 'Сохранить'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+            >
+              <Edit2 className="w-4 h-4" />
+              Редактировать
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Блоки информации - компактные карточки */}
+      <div className="space-y-4">
+        {/* Блок "О себе" */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 transition-all duration-200 hover:shadow-md">
+          <div className="flex items-center gap-2 mb-3">
+            <User className="w-4 h-4 text-gray-500" />
+            <h3 className="text-base font-semibold text-gray-900">О себе</h3>
+          </div>
+          {isEditing ? (
+            <textarea
+              value={editedUser.about || ''}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, about: e.target.value })
+              }
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm transition-all duration-200"
+              placeholder="Расскажите о себе"
+            />
+          ) : (
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {user.about || 'Описание отсутствует'}
+            </p>
+          )}
+        </div>
+
+        {/* Блок "Навыки" */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 transition-all duration-200 hover:shadow-md">
+          <div className="flex items-center gap-2 mb-3">
+            <Briefcase className="w-4 h-4 text-blue-500" />
+            <h3 className="text-base font-semibold text-gray-900">Навыки</h3>
+          </div>
+          {isEditing ? (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddSkill();
+                    }
+                  }}
+                  placeholder="Добавить навык"
+                  className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-200"
+                />
+                <button
+                  onClick={handleAddSkill}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-medium flex items-center gap-1.5 hover:scale-105 active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Добавить
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {editedUser.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200 transition-all duration-200 hover:bg-blue-100 hover:scale-105"
+                  >
+                    {skill}
+                    <button
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="text-blue-700 hover:text-blue-900 transition-colors"
+                    >
+                      <XIcon className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {user.skills.length > 0 ? (
+                user.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200 transition-all duration-200 hover:bg-blue-100 hover:scale-105 cursor-default"
+                  >
+                    {skill}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-500 text-sm">
+                  Навыки отсутствуют
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Блок "Интересы" */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 transition-all duration-200 hover:shadow-md">
+          <div className="flex items-center gap-2 mb-3">
+            <Heart className="w-4 h-4 text-purple-500" />
+            <h3 className="text-base font-semibold text-gray-900">Интересы</h3>
+          </div>
+          {isEditing ? (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={interestInput}
+                  onChange={(e) => setInterestInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddInterest();
+                    }
+                  }}
+                  placeholder="Добавить интерес"
+                  className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm transition-all duration-200"
+                />
+                <button
+                  onClick={handleAddInterest}
+                  className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 text-sm font-medium flex items-center gap-1.5 hover:scale-105 active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Добавить
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {editedUser.interests.map((interest) => (
+                  <span
+                    key={interest}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200 transition-all duration-200 hover:bg-purple-100 hover:scale-105"
+                  >
+                    {interest}
+                    <button
+                      onClick={() => handleRemoveInterest(interest)}
+                      className="text-purple-700 hover:text-purple-900 transition-colors"
+                    >
+                      <XIcon className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {user.interests.length > 0 ? (
+                user.interests.map((interest) => (
+                  <span
+                    key={interest}
+                    className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200 transition-all duration-200 hover:bg-purple-100 hover:scale-105 cursor-default"
+                  >
+                    {interest}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-500 text-sm">
+                  Интересы отсутствуют
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Блок "Социальные сети" */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 transition-all duration-200 hover:shadow-md">
+          <div className="flex items-center gap-2 mb-3">
+            <Globe className="w-4 h-4 text-gray-500" />
+            <h3 className="text-base font-semibold text-gray-900">
+              Социальные сети
+            </h3>
+          </div>
+          {isEditing ? (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={editedUser.socials?.github || ''}
+                onChange={(e) =>
+                  setEditedUser({
+                    ...editedUser,
+                    socials: {
+                      ...editedUser.socials,
+                      github: e.target.value,
+                    },
+                  })
+                }
+                placeholder="GitHub URL"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-200"
+              />
+              <input
+                type="text"
+                value={editedUser.socials?.telegram || ''}
+                onChange={(e) =>
+                  setEditedUser({
+                    ...editedUser,
+                    socials: {
+                      ...editedUser.socials,
+                      telegram: e.target.value,
+                    },
+                  })
+                }
+                placeholder="Telegram URL"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all duration-200"
+              />
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              {user.socials?.github && (
+                <a
+                  href={user.socials.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 group hover:scale-110"
+                  title="GitHub"
+                >
+                  <Github className="w-5 h-5 text-gray-600 group-hover:text-gray-900 transition-colors" />
+                </a>
+              )}
+              {user.socials?.telegram && (
+                <a
+                  href={user.socials.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 group hover:scale-110"
+                  title="Telegram"
+                >
+                  <Send className="w-5 h-5 text-gray-600 group-hover:text-gray-900 transition-colors" />
+                </a>
+              )}
+              {!user.socials?.github && !user.socials?.telegram && (
+                <span className="text-gray-500 text-sm">
+                  Социальные сети не указаны
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,6 +1,8 @@
-const mongoose = require('mongoose');
 
-const ProjectSchema = new mongoose.Schema({
+import { Schema, model, Types } from 'mongoose';
+
+const ProjectSchema = new Schema(
+  {
   title: {
     type: String,
     required: true,
@@ -16,7 +18,7 @@ const ProjectSchema = new mongoose.Schema({
   theme: {
     type: String,
     enum: [
-      'IT',
+      'Айти',
       'Наука',
       'Учёба',
       'Бизнес',
@@ -32,7 +34,7 @@ const ProjectSchema = new mongoose.Schema({
   }],
 
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'User',
     required: true
   },
@@ -46,6 +48,7 @@ const ProjectSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
+}
+);
 
-module.exports = mongoose.model('Project', ProjectSchema);
+export const Project = model('Project', ProjectSchema);
