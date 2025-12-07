@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useCompleteProfile } from '@/hooks/useCompleteProfile';
 import { useAuthStore } from '@/store/authStore';
 import { UserStatus } from '@/types/user';
+import { useCompleteRegistration } from '@/hooks/useCompleteRegistration';
 
 const STATUS_OPTIONS: UserStatus[] = [
   'Открыт к предложениям',
@@ -20,6 +21,8 @@ export default function CompleteProfileModal() {
   const setObserverMode = useAuthStore((state) => state.setObserverMode);
   const logout = useAuthStore((state) => state.logout);
   const { mutate: completeProfile, isPending } = useCompleteProfile();
+
+  const mutation = useCompleteRegistration();
 
   // Form state
   const [name, setName] = useState('');
@@ -118,7 +121,7 @@ export default function CompleteProfileModal() {
     if (validateForm()) {
       const socials = github || telegram ? { github, telegram } : undefined;
 
-      completeProfile({
+      mutation.mutate({
         name: name.trim(),
         specialization: specialization.trim() || undefined,
         about: about.trim() || undefined,
