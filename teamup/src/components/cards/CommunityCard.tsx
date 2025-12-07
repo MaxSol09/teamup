@@ -116,7 +116,7 @@ export const CommunityCard = ({ community, hasJoined = false }: CommunityCardPro
               {community.owner.name}
             </span>
             <span className="text-xs text-gray-500">
-              {formatMembersCount(community.membersCount)}
+              {formatMembersCount(community.membersCount ?? 0)}
             </span>
           </div>
         </div>

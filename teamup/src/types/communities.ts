@@ -15,4 +15,6 @@ export interface Community {
 
   createdAt: string;
   updatedAt: string;
+  
+  membersCount?: number;
 }
