@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useCompleteProfile } from '@/hooks/useCompleteProfile';
 import { useAuthStore } from '@/store/authStore';
 import { UserStatus } from '@/types/user';
@@ -14,6 +15,7 @@ const STATUS_OPTIONS: UserStatus[] = [
 ];
 
 export default function CompleteProfileModal() {
+  const pathname = usePathname();
   const showProfileModal = useAuthStore((state) => state.showProfileModal);
   const setObserverMode = useAuthStore((state) => state.setObserverMode);
   const logout = useAuthStore((state) => state.logout);
@@ -129,13 +131,14 @@ export default function CompleteProfileModal() {
     logout();
   };
 
-  if (!showProfileModal) {
+  // Не показывать модалку на страницах логина/регистрации
+  if (!showProfileModal || pathname === '/auth/login' || pathname === '/auth/register') {
     return null;
   }
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-12 md:pt-16">
         {/* Backdrop */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md animate-fadeIn" />
 
